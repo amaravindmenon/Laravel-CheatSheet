@@ -1,0 +1,507 @@
+Install composer
+
+
+
+From documentation
+composer create-project --prefer-dist laravel/laravel blog
+
+
+
+
+Setting the main page removing the public
+Copy paste server.php and rename as index.php
+Copy .htaccess from public and paste it at main head folder
+
+
+
+
+Overview (File Struture)
+App -> is the application folder containing all the source code
+It includes console exception middlware controller provider and model
+Console includes the artisan commands neccsry for larval
+Exception all the method to handle excption
+Http have controller and middleware and application request
+Controller includes model view and controller
+Middelware includes the middleware mechanism
+Filter and communication mechanism between request and response
+
+
+
+Database -> seeds includes classes used for unit testing 
+Migration includes queries for migrating the database used in web application
+Factories used to generate large number of data records
+
+Public -> root folder used in intilize the laravel application
+
+Resources -> file which enhances the web application
+Views -> main page of the web application
+
+Routes -> creating a Request URl 
+
+
+
+
+
+Checking our main page
+Routes -> web.php 
+(Resource -> Views -> welcome)
+
+Resourse -> Views -> Create Layout Folder(Header footer main) -> (footer.blade.php)
+
+Stylesheet and JS
+Link href = {{ asset('Link')}}
+
+
+
+
+Import file
+@extends('path.file')
+@section('content')
+@endsection
+
+Import file Dynamic content
+@yield('content')
+
+
+
+To create Database
+Configure .env file
+Update all DB details
+
+
+
+Six type of Route Method
+Get - Fetch
+Post - Insert
+Put - Update
+Delete - Delete
+Patch - Update single field
+Options
+
+Laravel Routes Contain 2 Parameters (Routes -> web.php)
+Url and Call back(Function)
+
+Route::get('/Hello',function () {
+    return 'Hello World';
+});
+
+Dynamic id
+Route::get('/user/{id}',function ($id) {
+    return 'your id is'.$id;
+});
+
+
+
+
+To create controller for MVC
+App -> http -> controllers
+cmd in main folder=> php artisan make:controller controllername
+
+
+
+about Controller
+namespace -> virtual directory
+request default class
+use -> class 
+
+
+
+
+Setup controller
+(Routes -> web.php)
+Route::get('/', 'controllername@method' );
+
+create the method on the same controllername
+public function() {
+    return view('welcome');
+}
+
+creating resourceful controller
+cmd => php artisan make:controller controllername --resource
+
+
+working controller
+Routes -> web.php => controller@method => app -> http -> controllers -> controller(create method/function)
+
+
+Creating model
+Default model -> App -> user.php defult login authentication
+Database -> migration -> default create user files
+
+create model
+cmd => php artisan make:model modelname -m
+(-m migrate)
+
+
+
+
+create databse table
+database -> migration -> open migrated table
+$table->datatype('tablename')->unique();
+$table->string('username')->unique();
+$table->string('name')
+
+To migrate this database to phpmyadmin
+cmd on main folder => php artisan migrate
+
+Errors check:
+In  -> App/Providers/Appserviceprovider
+use Illuminate/Support/Facades/Schema;
+
+public function boot () {
+    Schema::defaultStringLength(191);
+}
+
+
+
+
+To design first page
+Setup routes -> web.php
+Route::get('/linkpath', 'controllername@method') -> name('name for method');
+noww app -> controllername => create methodname
+public function method() {
+    return view('requstedpage');
+}
+Create the requested page in
+resource -> views -> requestedpage.blade.php
+import files for header and footer
+
+href url => href ={{ url('link')}}
+
+
+
+
+TO insert data in database
+route -> web.php 
+Route::post('/url', 'controllername@method')->name('name for method')
+now update the page for insert
+resource -> views -> insertpage
+
+form action = "{{ route('store method')}}" method="POST">
+For security adding CSRF in insert page
+
+{{ csrf_field() }}
+
+Now to controllercreated
+public function method(Request  $request){
+    $this->validate($request , [
+    "websitefield" => 'required',
+    "websitefield" => 'required'
+    ]);
+
+ $variable = new object;
+    $variable -> database fieldname = $request -> websitefield
+    $variable -> database fieldname = $request -> websitefield
+    $variable -> database fieldname = $request -> websitefield
+    $variable->save();
+    return redirect(route('urlname'))-> with('successMsg','message for success');
+}
+
+now add model in top
+use App\modelname;
+
+creating sessions in main page for success
+@if (session('successMsg'))
+{{ session('successMsg')}}
+@endif
+creating sessions in Same page for Errors
+@if ($errors->any())
+@foreach ($errors->all() as_$error)
+{{ $error }}
+@endforeach
+@endif
+
+
+
+
+Display data from database
+setup the website for Display
+App -> http -> controller -> controllername
+public function method() {
+    $variable = modelname::all();
+    return view('page',compact('variablename'))
+}
+
+loop to display data
+@foreach($variable as $newvariable)
+{{ $newvariable->database_name }}
+{{ $newvariable->database_name }}
+{{ $newvariable->database_name }}
+@endforeach
+
+
+
+
+
+Edit and update of data
+Create Routes of page
+Route::get('/edit/{id}','controllername@method')->name('edit')
+Route::post('/update/{id}','controllername@method')->name('update')
+
+create method in controller
+public function edit_method($id) {
+    $variable = modelname::find($id);
+    return view ('editpage', compact('variable'))
+}
+
+update from edit page
+form action='{{route('update',$variable->id)}}' method="POST">
+
+value to display
+input value={{ $variable->database_name }}
+
+public function update_method(Request $request, $id) {
+    $this->validate($request , [
+    "websitefield" => 'required',
+    "websitefield" => 'required'
+    ]);
+
+ $variable = modelname::find($id);
+    $variable -> database fieldname = $request -> websitefield
+    $variable -> database fieldname = $request -> websitefield
+    $variable -> database fieldname = $request -> websitefield
+    $variable->save();
+    return redirect(route('urlname'))-> with('successMsg','message for success');
+}
+
+
+
+
+
+Delete data from database
+Route::delete('/delete/{id}','controllername@method')->name('delete')
+
+now create method on controller
+public function delete_method($id) {
+    modelname::find($id)->delete();
+    return redirect(route('urlname'))-> with('successMsg','message for success');
+}
+
+in webpage
+<form action="post" id="delete-form-{{ $variable->id }}" action="{{ route("delete","$variable->id") }}">
+{{ csrf_field() }}
+{{ method_field('delete') }}
+
+
+
+
+
+Adding pagination
+AT controller
+change all to paginate
+$variable = modelname::paginate(4)
+
+in main webpage
+adding pagination
+{{ $variable->links() }}
+
+
+
+Laravel Default authentication
+From documentation
+Create Laravel project
+Go to security then authentication
+On routing copy the commands
+paste the command in the website folder
+Now setup bootstrap CDN in Layout
+Setup .env mail server
+
+For change passwrd field
+in controller
+public function changemethod(Request $request) {
+    $this -> validate($request [
+    'oldpassword' => 'required',
+    'password' => 'required | confirmed'
+    ]);
+
+    $hashedPassword = Auth::user()->password;
+    if (Hash::check($request->oldpassword, $hashedPassword))       // checking of password
+    $variable = modelname::find(Auth::id());
+    $variable->password = Hash::make($request->password);
+    $variable->save();
+    Auth::logout();
+    return redirect()->route('login')->with('successMsg','password changed')
+} else{
+    return redirect()->back()->with('error','password not matched')
+}
+
+Add all HASH, AUTH and modelname in header
+use App\User;
+use Illuminate/Support/Facades/Auth;
+use Illuminate/Support/Facades/Hash;
+
+
+
+
+Prevent back data and using middleware
+create method in class
+public function __construct() {
+    $this->middleware('auth');
+}
+
+
+
+
+To get the list of routes
+php artisan route:list
+
+To start server
+php artisan serve
+
+TO start Maintenence
+php artisan down
+php artisan up
+
+To check relatioship of database
+php artisan tinker
+App\modelname::find()
+
+
+Multiauthentication
+php artisan make:model Role -m
+
+model Role
+public function users() {
+    return $this->hasMany('App\Usermodel');             // One Role has many users
+}
+model User
+public function users() {
+    return $this->belongsTo('App\Rolemodel');           // One User has only One role
+}
+
+
+
+
+to use demo data
+php artisan make:seed RolesSeedername
+under run() {
+    DB::table('roles')->insert([
+    'name' => 'admin',
+    'fieldname' => 'data'
+    ])
+    DB::table('roles')->insert([
+    'name' => 'Users',
+    'fieldname' => 'data'
+    ])
+}
+add header
+se Illuminate/Support/Facades/DB;
+
+php artisan make:seed UsersSeedername
+under run() {
+    DB::table('users')->insert([
+    'name' => 'abc',
+    'fieldname' => 'data',
+    password => bcrypt('abc'),
+    ])
+     DB::table('users')->insert([
+    'name' => 'abc',
+    'fieldname' => 'data',
+    password => bcrypt('abc'),
+    ])
+}
+
+Under databaseseeder
+under run() {
+    $this->call([Usersseedername::class,
+                RolesSeedername::class,
+                ])
+}
+now 
+php artisan migrate
+
+now create two controller for two role
+php artisan make:middleware controllername
+
+
+to create two Middelware for two role
+php artisan make:middleware middlewarename
+
+after creating middleware Register it
+add the middleware in App->http-> kernel.php
+inside routeMiddleware
+'namefor middelware' => middelwarename::class;
+'namefor middelware' => middelwarename::class;
+
+Add headers for middleawre also
+use App\Http\middleawre\middlewarename
+use App\Http\middleawre\middlewarename
+
+adding route in web.php
+Route::get(['as'=>'admin.','prefix'=>'admin','namespace'=>'controller folder name','middleaware'=>['auth','admin']], 
+function() {
+    Route::get('dashboard','controllername@method')->name('name for it');
+});
+Route::get(['as'=>'author.','prefix'=>'author','namespace'=>'controller folder name','middleaware'=>['auth','author']], 
+function() {
+    Route::get('dashboard','controllername@method')->name('name for it');
+});
+
+user name display 
+{{ Auth::user()->name }}
+
+Under middleware
+middelware created
+under handle function() {
+    if (Auth::check() && Auth::user()->role->id == 1 ) {
+        return $next($request);
+    } else {
+        return redirect()-> route('login');
+    }
+}
+Add headers
+use Illuminate/Support/Facades/Auth
+
+Now under middleware -> redirect
+function handle() {
+    if (Auth::guard($guard)-> check() && Auth::user()->role->id == 1){
+        return redirect()->route('admin.dashboard');
+    }elseif (Auth::guard($guard)-> check() && Auth::user()->role->id == 2){
+        return redirect()->route('author.dashboard');
+    }else{
+        return $next($request);
+    }
+}
+
+under loginController
+remove path from protected $redirectto
+Under contruct
+if (Auth::check() && Auth::user()->role->id == 1 ) {
+        $this -> redirectTo = route(admin.dashboard)
+    } else {
+        $this -> redirectTo = route(author.dashboard)
+    }
+Add header
+use Illuminate/Support/Facades/Auth 
+
+
+under registercontroller
+remove path from protected $redirectto
+Under contruct
+if (Auth::check() && Auth::user()->role->id == 1 ) {
+        $this -> redirectTo = route(admin.dashboard)
+    } else {
+        $this -> redirectTo = route(author.dashboard);
+    }
+    $this>middleware ('guest')
+Add header
+use Illuminate/Support/Facades/Auth 
+
+
+
+
+TO update Laravel versions
+look for the updates in Laravel website-> Prologue-> Upgrade guide
+Change the required upgrade versions in composer.json file
+now on cmd
+composer update
+
+Compose require laravel/helper
+
+
+php component
+php artisan make:component componentname
+in webpage
+<x-header componentName="name" />
+
+
